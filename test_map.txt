@@ -1,0 +1,11 @@
+nb_drones: a
+
+start_hub: start 0 0 [color=two]
+hub: waypoint1 1 0 [color=blue]
+hub: waypoint2 2 0 [color=blue]
+hub: waypoint2 3 0 [color=red]
+end_hub: goal 3 0 [color=red]
+
+connection: start-waypoint1
+connection: waypoint1-wayoint2
+connection: waypoint2-goal
