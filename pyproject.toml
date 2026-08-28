@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "Fly_In"
 version = "0.1.0"
-description = "Parser and route planner for drone navigation maps"
+description = "Parser und Routenplaner für Drohnen-Navigationskarten"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

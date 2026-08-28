@@ -26,14 +26,14 @@ class RouteConfig(BaseModel):
 class Parser:
     def __init__(self, file_path):
         self.file_path = file_path
-        # Zustand (State) wird nun in der Instanz gehalten
+
+    def parse(self) -> RouteConfig:
         self.raw_data = {"zones": {}, "connections": []}
         self.seen_connections = set()
         self.start_count = 0
         self.end_count = 0
         self.parsed_nb_drones = False
 
-    def parse(self) -> RouteConfig:
         with open(self.file_path, 'r') as file:
             for line_num, line in enumerate(file, start=1):
                 line = line.strip()
@@ -48,15 +48,18 @@ class Parser:
     def _route_line(self, line: str, line_num: int):
         if not self.parsed_nb_drones:
             self._parse_nb_drones(line, line_num)
+
         elif line.startswith(("start_hub:", "hub:", "end_hub:")):
             self._parse_zone(line, line_num)
+
         elif line.startswith("connection:"):
             self._parse_connection(line, line_num)
+
         else:
             raise ParseError(f"Line {line_num}: Invalid syntax -> '{line}'")
 
     def _parse_nb_drones(self, line: str, line_num: int):
-        match = re.match(r'^nb_drones\s*:\s*(\d+)$', line)
+        match = re.match(r'^nb_drones\s*:\s*(-?\d+)$', line)
         if not match:
             raise ParseError(f"Line {line_num}: First uncommented line must define 'nb_drones: <int>'.")
         
@@ -76,6 +79,7 @@ class Parser:
         
         if "-" in name:
             raise ParseError(f"Line {line_num}: Zone '{name}' contains invalid character '-'.")
+
         if name in self.raw_data["zones"]:
             raise ParseError(f"Line {line_num}: Duplicate zone '{name}'.")
         
@@ -92,6 +96,7 @@ class Parser:
         if "max_drones" in meta_dict:
             if not meta_dict["max_drones"].isdigit() or int(meta_dict["max_drones"]) <= 0:
                 raise ParseError(f"Line {line_num}: max_drones must be a positive integer.")
+
             max_drones = int(meta_dict["max_drones"])
 
         self.raw_data["zones"][name] = {
@@ -115,6 +120,7 @@ class Parser:
         
         meta_dict = self._parse_metadata(meta_str, line_num)
         max_capacity = None
+
         if "max_link_capacity" in meta_dict:
             if not meta_dict["max_link_capacity"].isdigit() or int(meta_dict["max_link_capacity"]) <= 0:
                 raise ParseError(f"Line {line_num}: max_link_capacity must be a positive integer.")
@@ -129,11 +135,13 @@ class Parser:
         if not meta_string:
             return {}
         meta_dict = {}
+
         for pair in meta_string.strip().split():
             if "=" not in pair:
                 raise ParseError(f"Line {line_num}: Invalid metadata syntax '{pair}'. Expected 'key=value'.")
             key, val = pair.split("=", 1)
             meta_dict[key] = val
+
         return meta_dict
 
     def _validate_file_completeness(self):

@@ -1,5 +1,5 @@
 import pytest
-from route_parser import Parser, ParseError
+from parser import Parser, ParseError
 
 # Hilfsfunktion, um schnell Testdateien zu generieren
 def create_map(tmp_path, content: str):
