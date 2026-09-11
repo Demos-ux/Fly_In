@@ -2,8 +2,10 @@ from objects import Connection, RouteConfig, Zone
 
 
 class Graph:
+    """Represent map zones and their undirected connections."""
 
     def __init__(self, config: RouteConfig):
+        """Build and validate a graph from a route configuration."""
         self.config = config
         self._zones = config.zones
         self._adjacency: dict = {
@@ -18,6 +20,7 @@ class Graph:
             self._adjacency[connection.z2][connection.z1] = connection
 
     def _validate_graph(self):
+        """Validate graph-specific rules before building adjacency data."""
         start_zones = [
             zone for zone in self._zones.values()
             if zone.role == "start_hub"
@@ -64,18 +67,22 @@ class Graph:
             seen_edges.add(edge)
 
     def zone(self, name: str) -> Zone:
+        """Return the zone with the given name."""
         return self._zones[name]
 
     def all_vertices(self) -> set[str]:
+        """Return the names of all zones in the graph."""
         return set(self._zones)
 
     def neighbors(self, zone_name: str) -> list[str]:
+        """Return zones directly connected to the given zone."""
         if zone_name not in self._adjacency:
             raise KeyError(f"Unknown zone: {zone_name}")
 
         return list(self._adjacency[zone_name])
 
     def edges(self, zone_name: str) -> list[Connection]:
+        """Return connections leaving the given zone."""
         if zone_name not in self._adjacency:
             raise KeyError(f"Unknown zone: {zone_name}")
 
@@ -86,7 +93,9 @@ class Graph:
         first: str,
         second: str,
     ) -> Connection | None:
+        """Return the connection between two zones, if it exists."""
         return self._adjacency.get(first, {}).get(second)
 
     def all_edges(self) -> list[Connection]:
+        """Return every connection in the graph exactly once."""
         return self.config.connections.copy()
