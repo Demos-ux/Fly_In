@@ -1,4 +1,4 @@
-from parser import RouteConfig, Connection, Zone
+from objects import Connection, RouteConfig, Zone
 
 
 class Graph:
