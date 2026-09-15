@@ -10,10 +10,7 @@ from parser import ParseError, Parser
 from simulation import Simulation
 
 
-class Application:
-    """Coordinate the command-line workflow for one simulation run."""
-
-    TARGET_TURNS = {
+TARGET_TURNS = {
         "01_linear_path.txt": 6,
         "02_simple_fork.txt": 6,
         "03_basic_capacity.txt": 8,
@@ -25,6 +22,11 @@ class Application:
         "03_ultimate_challenge.txt": 35,
         "01_the_impossible_dream.txt": 45,
     }
+
+
+class Application:
+    """Coordinate the command-line workflow for one simulation run."""
+
 
     def __init__(self, args: Namespace):
         """Store command-line options and initialize the run timer."""
@@ -38,13 +40,15 @@ class Application:
         goal = self._find_endpoint(config, "end_hub")
 
         simulation = Simulation(graph)
-        on_turn = self._create_turn_callback(graph, goal)
-        lines = simulation.run(start, goal, on_turn=on_turn)
+        #checks for the visual flag and starts it
+        turn_callback = self._create_turn_callback(graph, goal)
+        
+        lines = simulation.run(start, goal, on_turn=turn_callback)
 
         if lines is None:
             raise SystemExit("No path exists")
 
-        live_visual = on_turn is not None
+        live_visual = turn_callback is not None
         self._write_or_print_output(
             lines,
             graph,
@@ -139,7 +143,7 @@ class Application:
         print(f"target_turns={target if target is not None else 'n/a'}")
         print(f"result={result}")
 
-    @classmethod
-    def _target_for_map(cls, map_path: str) -> int | None:
+    @staticmethod
+    def _target_for_map(map_path: str) -> int | None:
         """Return the configured turn target for a map file name."""
-        return cls.TARGET_TURNS.get(Path(map_path).name)
+        return TARGET_TURNS.get(Path(map_path).name)
