@@ -6,16 +6,16 @@ class Graph:
 
     def __init__(self, config: RouteConfig):
         """Build and validate a graph from a route configuration."""
-        self.config = config
-        self._zones = config.zones
-        self._adjacency: dict = {
+        self.config = config.model_copy(deep=True)
+        self._zones = self.config.zones
+        self._adjacency: dict[str, dict[str, Connection]] = {
             zone_name: {}
             for zone_name in self._zones
         }
 
         self._validate_graph()
 
-        for connection in config.connections:
+        for connection in self.config.connections:
             self._adjacency[connection.z1][connection.z2] = connection
             self._adjacency[connection.z2][connection.z1] = connection
 
