@@ -13,19 +13,20 @@ class Pathfinder:
         self,
         start: str,
         goal: str,
-        forbidden: set[str] | None = None,
+        forbidden: set[str] | None = None, #forbidden zones to avoid
     ) -> list[str] | None:
         """Return a shortest path while excluding forbidden zones."""
         forbidden = forbidden or set()
+        zones = self.graph.all_vertices()
 
-        if start not in self.graph._zones or goal not in self.graph._zones:
+        if start not in zones or goal not in zones:
             return None
 
         if start in forbidden or goal in forbidden:
             return None
 
         queue = deque([start])
-        previous: dict[str, Optional[str]] = {start: None}
+        previous: dict[str, Optional[str]] = {start: None} 
 
         while queue:
             current = queue.popleft()
@@ -62,4 +63,5 @@ class Pathfinder:
             current = previous[current]
 
         path.reverse()
+        
         return path
