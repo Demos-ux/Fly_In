@@ -35,7 +35,7 @@ class Simulation:
         while self.drones:
             movements, completed_flights = self._complete_flights()
             movements.extend(
-                self._move_available_drones(start, goal, completed_flights)
+                self._move_available_drones(goal, completed_flights)
             )
 
             self.drones = [
@@ -52,7 +52,6 @@ class Simulation:
 
             if on_turn is not None:
                 on_turn(turn_output, len(output_lines))
-
         return output_lines
 
     def _complete_flights(self) -> tuple[list[str], set[int]]:
@@ -78,7 +77,6 @@ class Simulation:
 
     def _move_available_drones(
         self,
-        start: str,
         goal: str,
         completed_flights: set[int],
     ) -> list[str]:
