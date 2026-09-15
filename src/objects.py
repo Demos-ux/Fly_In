@@ -1,17 +1,21 @@
 from dataclasses import dataclass
-from pydantic import BaseModel, Field
+from typing import Literal
+
+from pydantic import BaseModel, Field, model_validator
 
 
 class Zone(BaseModel):
     """Describe a named map zone and its movement constraints."""
 
-    role: str
+    role: Literal["start_hub", "hub", "end_hub"]
     name: str
     x: int
     y: int
-    zone_type: str = "normal"
+    zone_type: Literal["normal", "blocked", "restricted", "priority"] = (
+        "normal"
+    )
     color: str | None = None
-    max_drones: int | None = None
+    max_drones: int | None = Field(default=None, gt=0)
 
 
 class Connection(BaseModel):
@@ -19,7 +23,7 @@ class Connection(BaseModel):
 
     z1: str
     z2: str
-    max_link_capacity: int | None = None
+    max_link_capacity: int | None = Field(default=None, gt=0)
 
 
 class RouteConfig(BaseModel):
@@ -28,6 +32,15 @@ class RouteConfig(BaseModel):
     nb_drones: int = Field(gt=0)
     zones: dict[str, Zone]
     connections: list[Connection]
+
+    @model_validator(mode="after")
+    def validate_zone_names(self):
+        for zone_name, zone in self.zones.items():
+            if zone.name != zone_name:
+                raise ValueError(
+                    f"Zone key does not match zone name: {zone_name}"
+                )
+        return self
 
 
 @dataclass
